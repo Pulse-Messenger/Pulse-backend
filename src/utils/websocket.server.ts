@@ -4,7 +4,7 @@ import http from "http";
 export const setupIOServer = (httpServer: http.Server) => {
   io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: "https://app.pulse-messenger.com",
     },
   });
 };

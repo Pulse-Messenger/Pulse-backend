@@ -16,7 +16,7 @@ const app = express();
 const port = process.env.APP_PORT || 3000;
 
 app.use(express.json());
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(cors({ origin: ["https://app.pulse-messenger.com"] }));
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   if (
     err instanceof SyntaxError &&
