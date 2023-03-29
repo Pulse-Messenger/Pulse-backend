@@ -67,3 +67,12 @@ export const DeleteSessionValidator = {
       .bail(),
   ],
 };
+
+export const VerifyEmailValidator = {
+  validator: [
+    param("emailToken")
+      .notEmpty()
+      .withMessage("Email token is required.")
+      .bail(),
+  ],
+};

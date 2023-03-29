@@ -2,11 +2,9 @@ import { Schema, model } from "mongoose";
 
 export const friendshipSchema = new Schema({
   accepted: Boolean,
-  creator: { type: String, ref: "user", index: true },
-  friend: { type: String, ref: "user", index: true },
+  creator: { type: Schema.Types.ObjectId, ref: "user", index: true },
+  friend: { type: Schema.Types.ObjectId, ref: "user", index: true },
 });
-
-friendshipSchema.post("remove", async function (this: IFriendshipDocument) {});
 
 export interface IFriendshipSchema {
   id?: string;

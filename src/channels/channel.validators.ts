@@ -12,11 +12,10 @@ export const NewChannelValidator = {
       .bail(),
     body("category")
       .isString()
-      .notEmpty()
       .withMessage("Category is required.")
       .bail()
-      .isLength({ min: 1, max: 20 })
-      .withMessage("Category must be between 1 and 20 characters.")
+      .isLength({ min: 0, max: 20 })
+      .withMessage("Category must be between 0 and 20 characters.")
       .bail(),
     body("description")
       .isString()
@@ -75,11 +74,10 @@ export const UpdateChannelValidator = {
       .bail(),
     body("category")
       .isString()
-      .notEmpty()
       .withMessage("Category is required.")
       .bail()
-      .isLength({ min: 1, max: 20 })
-      .withMessage("Username must be between 1 and 20 characters.")
+      .isLength({ min: 0, max: 20 })
+      .withMessage("Category must be between 0 and 20 characters.")
       .bail(),
   ],
 };

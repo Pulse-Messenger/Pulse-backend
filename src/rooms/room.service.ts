@@ -18,7 +18,7 @@ export class RoomService {
       creatorID: roomData.creatorID,
       members: [roomData.creatorID],
       channels: [],
-      dm: false,
+      friendship: undefined,
     };
 
     const newRoom = new Room(data);
@@ -59,19 +59,22 @@ export class RoomService {
 
     if (!room) throw { code: 404, message: "Room not found" };
 
-    if (room.dm) throw { code: 400, message: "Can't remove a DM" };
-
     const members =
       room.members.map((mem) => {
         return mem.toString();
       }) ?? [];
 
-    if (userID !== room.creatorID.toString())
+    if (!room.friendship && userID !== room.creatorID.toString())
       throw { code: 403, message: "Only room owner can delete the room" };
+    else if (room.friendship && !room.members.includes(userID))
+      throw { code: 403, message: "Only DM members can delete the DM" };
 
     await room.remove();
 
-    io.to(members).emit("rooms:deleteOne", { roomID, userID });
+    io.to(members).emit(room.friendship ? "DMs:deleteOne" : "rooms:deleteOne", {
+      roomID,
+      userID,
+    });
   }
 
   async joinRoom(inviteCode: string, userID: string) {
@@ -81,7 +84,7 @@ export class RoomService {
     const room = await Room.findById(invite?.roomID);
     if (!room) throw { code: 404, message: "Room not found" };
 
-    if (room.dm) throw { code: 400, message: "Can't join a DM" };
+    if (room.friendship) throw { code: 400, message: "Can't join a DM" };
 
     const members =
       room.members.map((mem) => {
@@ -122,7 +125,7 @@ export class RoomService {
     if (room.creatorID === userID)
       throw { code: 400, message: "Room creator can't leave room" };
 
-    if (room.dm) throw { code: 400, message: "Can't leave a DM" };
+    if (room.friendship) throw { code: 400, message: "Can't leave a DM" };
 
     const members =
       room.members.map((mem) => {
@@ -186,6 +189,15 @@ export class RoomService {
     if (!friendship || !friendship.accepted)
       throw { code: 400, message: "You can only DM a friend" };
 
+    const dm = await Room.findOne({
+      $or: [
+        { "friendship.friendA": userID, "friendship.friendB": friendID },
+        { "friendship.friendA": friendID, "friendship.friendB": userID },
+      ],
+    });
+
+    if (dm) throw { code: 400, message: "DM already exists" };
+
     const data: IRoomSchema = {
       name: user.username + "+" + friend.username,
       profilePic: "",
@@ -193,7 +205,10 @@ export class RoomService {
       creatorID: userID,
       members: [userID, friendID],
       channels: [],
-      dm: true,
+      friendship: {
+        friendA: user.id,
+        friendB: friend.id,
+      },
     };
 
     const newRoom = new Room(data);
@@ -210,13 +225,15 @@ export class RoomService {
     );
     if (!newChanel) throw { code: 400, message: "Failed to create channel" };
 
-    user.rooms.push(newRoom.id);
+    user.DMs.push(newRoom.id);
+    friend.DMs.push(newRoom.id);
 
     await user.save();
+    await friend.save();
 
     const { _id, ...dt } = newRoom.toObject();
 
-    io.to(user.id).emit("rooms:create", {
+    io.to([user.id, friend.id]).emit("DMs:create", {
       room: {
         id: _id,
         ...dt,

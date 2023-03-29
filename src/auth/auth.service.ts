@@ -1,8 +1,9 @@
 import { User, IUserSchema, IUserSession } from "../schemas/user.schema";
 import { ascrypt } from "../utils/crypto";
+import { io } from "../utils/websocket.server";
 
 import * as jwt from "jsonwebtoken";
-import { io } from "../utils/websocket.server";
+import { CronJob } from "cron";
 
 export class AuthService {
   async checkPassword(username: string, password: string, userID?: string) {
@@ -165,6 +166,27 @@ export class AuthService {
       useragent: s.useragent,
     }));
   }
+
+  async verifyEmail(userID: string) {
+    const user = await User.findById(userID);
+    if (!user) throw { code: 404, message: "User does not exist" };
+
+    if (!user.verified) {
+      user.verified = true;
+
+      await user.save();
+    }
+  }
 }
+
+// everyday at noon
+const emailJob = new CronJob("0 */6 * * *	", async () => {
+  const unverifiedUsers = await User.find({ verified: false });
+  unverifiedUsers.forEach(async (usr) => {
+    const now = Date.now();
+    if (now - usr.createdAt >= 86400000) await usr.remove();
+  });
+});
+emailJob.start();
 
 export const authService = new AuthService();

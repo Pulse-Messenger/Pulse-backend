@@ -9,8 +9,13 @@ import { settignsService } from "../settings/settings.service";
 
 export class UserService {
   async UserExists(username: string, email: string) {
-    let user = await User.findOne({ $or: [{ username }, { email }] });
+    const user = await User.findOne({ $or: [{ username }, { email }] });
     return !!user;
+  }
+
+  async UserVerified(username: string, email: string) {
+    const user = await User.findOne({ $or: [{ username }, { email }] });
+    return user?.verified;
   }
 
   async CreateUser(data: {
@@ -28,6 +33,8 @@ export class UserService {
       profilePic: `${process.env.S3_BASE_URL}/misc/User.png`,
       rooms: [],
       DMs: [],
+      verified: false,
+      createdAt: Date.now(),
       about: "",
       globalRoles: [],
       passwordHash: hash,
@@ -40,7 +47,7 @@ export class UserService {
 
     await settignsService.create(user.id);
 
-    return user.id;
+    return user;
   }
 
   async getSelf(userID: string) {

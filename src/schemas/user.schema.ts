@@ -6,6 +6,8 @@ export const userSchema = new Schema({
   displayName: String,
   profilePic: String,
   about: String,
+  verified: Boolean,
+  createdAt: Number,
   rooms: [{ type: Schema.Types.ObjectId, ref: "room", index: true }],
   DMs: [{ type: Schema.Types.ObjectId, ref: "room", index: true }],
   globalRoles: [{ type: String }],
@@ -56,6 +58,8 @@ export interface IUserSchema {
   email: string;
   displayName: string;
   profilePic: string;
+  verified: boolean;
+  createdAt: number;
   rooms: string[] | any[];
   DMs: string[] | any[];
   about: string;

@@ -7,7 +7,10 @@ import {
   ValidatedApi,
 } from "../utils/controller.decorators";
 import { friendshipService } from "./friendship.service";
-import { FriendshipValidator } from "./friendship.validators";
+import {
+  FriendshipValidator,
+  NewFriendValidator,
+} from "./friendship.validators";
 
 @Controller("/friendships")
 class FriendshipController {
@@ -27,15 +30,15 @@ class FriendshipController {
     }
   }
 
-  @ValidatedApi("post", "/create/:friendID", FriendshipValidator)
+  @ValidatedApi("post", "/create/:username", NewFriendValidator)
   @Middleware(authenticatedOnly())
   async createFriendship(
-    data: { friendID: string },
+    data: { username: string },
     req: Request,
     res: Response
   ) {
     try {
-      await friendshipService.createFriendship(getUserId(req), data.friendID);
+      await friendshipService.createFriendship(getUserId(req), data.username);
 
       res.sendStatus(200);
     } catch (err: any) {
@@ -43,7 +46,7 @@ class FriendshipController {
     }
   }
 
-  @ValidatedApi("delete", "/remove/:friendID", FriendshipValidator)
+  @ValidatedApi("post", "/remove/:friendID", FriendshipValidator)
   @Middleware(authenticatedOnly())
   async removeFriendship(
     data: { friendID: string },
@@ -59,7 +62,7 @@ class FriendshipController {
     }
   }
 
-  @ValidatedApi("delete", "/cancel/:friendID", FriendshipValidator)
+  @ValidatedApi("post", "/cancel/:friendID", FriendshipValidator)
   @Middleware(authenticatedOnly())
   async cancelFriendship(
     data: { friendID: string },
@@ -91,7 +94,7 @@ class FriendshipController {
     }
   }
 
-  @ValidatedApi("delete", "/reject/:friendID", FriendshipValidator)
+  @ValidatedApi("post", "/reject/:friendID", FriendshipValidator)
   @Middleware(authenticatedOnly())
   async rejectFriendship(
     data: { friendID: string },

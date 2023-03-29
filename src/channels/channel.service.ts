@@ -12,13 +12,15 @@ export class ChannelService {
       description: string;
       roomID: string;
     },
-    userID: string
+    userID: string,
+    dm?: boolean
   ) {
     const room = await Room.findById(channelData.roomID);
 
     if (!room) throw { code: 404, message: "Room not found" };
 
-    if (room.dm) throw { code: 400, message: "Can't create channels in DM" };
+    if (room.friendship && dm)
+      throw { code: 400, message: "Can't create channels in DM" };
 
     if (userID !== room.creatorID.toString())
       throw { code: 403, message: "Only room owners can add channels" };
@@ -57,7 +59,7 @@ export class ChannelService {
     return { channelID: channel.id };
   }
 
-  async removeChannel(channelID: string, userID: string) {
+  async removeChannel(channelID: string, userID: string, dm?: boolean) {
     const channel = await Channel.findById(channelID);
 
     if (!channel) throw { code: 404, message: "Channel not found" };
@@ -67,7 +69,8 @@ export class ChannelService {
     if (userID !== room?.creatorID.toString())
       throw { code: 403, message: "Only room owners can remove channels" };
 
-    if (room.dm) throw { code: 400, message: "Can't remove channels in DM" };
+    if (room.friendship && dm)
+      throw { code: 400, message: "Can't remove channels in DM" };
 
     await channel.delete();
 

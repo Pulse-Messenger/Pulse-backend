@@ -8,3 +8,12 @@ export const FriendshipValidator = {
       .bail(),
   ],
 };
+
+export const NewFriendValidator = {
+  validator: [
+    param("username")
+      .isLength({ max: 20, min: 1 })
+      .withMessage("Username is required.")
+      .bail(),
+  ],
+};

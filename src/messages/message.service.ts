@@ -8,6 +8,7 @@ import { Channel } from "../schemas/channel.schema";
 import { Room } from "../schemas/room.schema";
 import { IMessageSchema, Message } from "../schemas/message.schema";
 import { io } from "../utils/websocket.server";
+import { Friendship } from "../schemas/friendship.schema";
 
 export class MessageService {
   async getOne(messageID: string, userID: string) {
@@ -64,6 +65,17 @@ export class MessageService {
         message: "Only room members can publish room messages",
       };
 
+    if (room?.friendship) {
+      const friendship = await Friendship.findOne({
+        $or: [{ creator: userID }, { friend: userID }],
+      });
+      if (!friendship || !friendship.accepted)
+        throw {
+          code: 403,
+          message: "You can only message friends",
+        };
+    }
+
     const newMessage = new Message(data);
 
     await channel.save();
@@ -97,6 +109,16 @@ export class MessageService {
       room?.members.map((member) => {
         return member.toString();
       }) ?? [];
+
+    if (
+      message.sender.toString() !==
+        new mongoose.Types.ObjectId(userID).toString() &&
+      !room?.friendship
+    )
+      throw {
+        code: 403,
+        message: "Only mesage creators can remove messages in a DM",
+      };
 
     if (
       message.sender.toString() !==

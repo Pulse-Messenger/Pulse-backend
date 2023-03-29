@@ -1,4 +1,5 @@
 import { Friendship } from "../schemas/friendship.schema";
+import { User } from "../schemas/user.schema";
 import { io } from "../utils/websocket.server";
 
 class FriendshipService {
@@ -11,8 +12,15 @@ class FriendshipService {
     return friendships;
   }
 
-  async createFriendship(userID: string, friendID: string) {
-    if (userID === friendID)
+  async createFriendship(userID: string, username: string) {
+    const friend = await User.findOne({ username });
+    if (!friend)
+      throw {
+        code: 404,
+        message: "This user does not exist",
+      };
+
+    if (userID === friend.id)
       throw {
         code: 400,
         message: "Friendship can only exist between different users",
@@ -20,8 +28,8 @@ class FriendshipService {
 
     const existingFriendship = await Friendship.findOne({
       $or: [
-        { creator: userID, friend: friendID },
-        { creator: friendID, friend: userID },
+        { creator: userID, friend: friend.id },
+        { creator: friend.id, friend: userID },
       ],
     });
 
@@ -30,7 +38,7 @@ class FriendshipService {
 
     const newFriendship = new Friendship({
       creator: userID,
-      friend: friendID,
+      friend: friend.id,
       accepted: false,
     });
 
@@ -38,7 +46,7 @@ class FriendshipService {
 
     const { _id, ...dt } = newFriendship.toObject();
 
-    io.to([userID, friendID]).emit("friendship:new", {
+    io.to([userID, friend.id]).emit("friendship:new", {
       friendship: {
         id: _id,
         ...dt,
@@ -83,7 +91,10 @@ class FriendshipService {
       };
 
     const existingFriendship = await Friendship.findOne({
-      $or: [{ creator: friendID, friend: userID }],
+      $or: [
+        { creator: userID, friend: friendID },
+        { creator: friendID, friend: userID },
+      ],
     });
 
     if (!existingFriendship)
@@ -111,7 +122,10 @@ class FriendshipService {
       };
 
     const existingFriendship = await Friendship.findOne({
-      $or: [{ creator: friendID, friend: userID }],
+      $or: [
+        { creator: userID, friend: friendID },
+        { creator: friendID, friend: userID },
+      ],
     });
 
     if (!existingFriendship)

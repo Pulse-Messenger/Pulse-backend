@@ -9,7 +9,10 @@ export class InviteService {
     const room = await Room.findById(roomID);
     if (!room) throw { code: 404, message: "Room not found" };
 
-    if (room.dm) throw { code: 400, message: "Can't invite users to DM" };
+    if (room.friendship) {
+      console.log(room.friendship);
+      throw { code: 400, message: "Can't invite users to DM" };
+    }
 
     if (room.creatorID.toString() != userID)
       throw { code: 403, message: "Only room owners can create invites" };

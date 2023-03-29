@@ -12,6 +12,7 @@ import {
   PasswordValidator,
   RegisterData,
   RegisterValidator,
+  VerifyEmailValidator,
 } from "./auth.validators";
 import { authService } from "./auth.service";
 import { userService } from "../users/user.service";
@@ -21,6 +22,9 @@ import {
   notAuthenticatedOnly,
   getToken,
 } from "./auth.middleware";
+import { email } from "../utils/email";
+import * as jwt from "jsonwebtoken";
+import { JWT } from "google-auth-library";
 
 @Controller("/auth")
 class AuthController {
@@ -44,18 +48,50 @@ class AuthController {
       return;
     }
 
-    await userService.CreateUser(data);
+    const user = await userService.CreateUser(data);
+
+    const emailToken = jwt.sign(
+      { userID: user.id },
+      process.env.JWT_SECRET as string,
+      {
+        issuer: "Pulse",
+        subject: "Email",
+      }
+    );
+
+    const tokenURL = `${
+      req.protocol + "://" + req.get("host") + "/api/auth/verify/" + emailToken
+    }`;
+
+    email.sendEmail({
+      to: data.email,
+      subject: "Click to verify email",
+      html: `
+      <h3>Welcome To Pulse Messenger</h3>
+      <a href="${tokenURL}">Click here to verify email</a>
+      <p>Link doensn't work?</p>
+      ${tokenURL}
+
+      <p>Account will be automatically deleted after 1 day if you dont verify your email</p>
+      `,
+    });
+
     res.sendStatus(201);
   }
 
   @ValidatedApi("post", "/login", LoginValidator)
   @Middleware(notAuthenticatedOnly())
   async login(data: LoginData, req: express.Request, res: express.Response) {
-    if (!(await userService.UserExists(data.username, data.username))) {
-      res.status(404).send({ errors: ["User not found"] });
-      return;
-    }
     try {
+      if (!(await userService.UserExists(data.username, data.username))) {
+        res.status(404).send({ errors: ["User not found"] });
+        return;
+      }
+      if (!(await userService.UserVerified(data.username, data.username))) {
+        res.status(400).send({ errors: ["User is not verified"] });
+        return;
+      }
+
       if (!(await authService.checkPassword(data.username, data.password))) {
         res.status(400).send({ errors: ["Invalid password"] });
         return;
@@ -160,6 +196,32 @@ class AuthController {
       );
       res.send({ valid: passwordMatch });
     } catch (err: any) {
+      res.status(err.code).send({ errors: [err.message] });
+    }
+  }
+
+  @ValidatedApi("get", "/verify/:emailToken", VerifyEmailValidator)
+  async verify(
+    data: { emailToken: string },
+    req: express.Request,
+    res: express.Response
+  ) {
+    try {
+      let dt;
+      try {
+        dt = jwt.verify(data.emailToken, process.env.JWT_SECRET!);
+      } catch (_) {
+        throw { code: 401, message: "Invalid email token" };
+      }
+
+      if (!dt) throw { code: 401, message: "Invalid email token" };
+
+      //@ts-ignore
+      await authService.verifyEmail(dt.userID);
+
+      res.send("User is now verified");
+    } catch (err: any) {
+      console.error(err);
       res.status(err.code).send({ errors: [err.message] });
     }
   }
