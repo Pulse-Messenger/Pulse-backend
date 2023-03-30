@@ -13,5 +13,5 @@ io.on("connection", async (socket) => {
 
   socket.join(userID);
   socket.join(sessionID);
-  // console.debug("New connection: ", socket.rooms);
+  console.debug("New connection: ", socket.rooms);
 });

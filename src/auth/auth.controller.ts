@@ -69,7 +69,7 @@ class AuthController {
       html: `
       <h3>Welcome To Pulse Messenger</h3>
       <a href="${tokenURL}">Click here to verify email</a>
-      <p>Link doensn't work?</p>
+      <p>Link doesn't work?</p>
       ${tokenURL}
 
       <p>Account will be automatically deleted after 1 day if you dont verify your email</p>
