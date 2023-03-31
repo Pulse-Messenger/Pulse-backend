@@ -33,6 +33,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+app.set("trust proxy", "loopback");
+
 import "./auth/auth.controller";
 import "./users/user.controller";
 import "./rooms/room.controller";

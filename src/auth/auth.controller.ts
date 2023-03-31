@@ -99,7 +99,9 @@ class AuthController {
 
       const tokens = await authService.createSession(
         data.username,
-        req.socket.remoteAddress ?? "???",
+        req.headers["x-forwarded-for"]?.toString() ??
+          req.socket.remoteAddress ??
+          "???",
         req.headers["user-agent"] ?? "???"
       );
 
