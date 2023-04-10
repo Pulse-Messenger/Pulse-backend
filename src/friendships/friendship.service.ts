@@ -7,7 +7,9 @@ class FriendshipService {
     const friendships =
       (await Friendship.find({
         $or: [{ creator: userID }, { friend: userID }],
-      })) ?? [];
+      })
+        .lean(true)
+        .select("-__v")) ?? [];
 
     return friendships;
   }
@@ -44,7 +46,7 @@ class FriendshipService {
 
     await newFriendship.save();
 
-    const { _id, ...dt } = newFriendship.toObject();
+    const { _id, __v, ...dt } = newFriendship.toObject();
 
     io.to([userID, friend.id]).emit("friendship:new", {
       friendship: {
@@ -73,7 +75,7 @@ class FriendshipService {
 
     await existingFriendship.remove();
 
-    const { _id, ...dt } = existingFriendship.toObject();
+    const { _id, __v, ...dt } = existingFriendship.toObject();
 
     io.to([userID, friendID]).emit("friendship:remove", {
       friendship: {
@@ -104,7 +106,7 @@ class FriendshipService {
 
     await existingFriendship.save();
 
-    const { _id, ...dt } = existingFriendship.toObject();
+    const { _id, __v, ...dt } = existingFriendship.toObject();
 
     io.to([userID, friendID]).emit("friendship:accept", {
       friendship: {
@@ -133,7 +135,7 @@ class FriendshipService {
 
     await existingFriendship.remove();
 
-    const { _id, ...dt } = existingFriendship.toObject();
+    const { _id, __v, ...dt } = existingFriendship.toObject();
 
     io.to([userID, friendID]).emit("friendship:reject", {
       friendship: {

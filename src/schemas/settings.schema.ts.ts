@@ -7,18 +7,25 @@ export const settingsSchema = new Schema({
       theme: { type: String },
       scale: { type: Number },
     },
+    notifications: {
+      doNotDisturb: { type: Boolean },
+    },
   },
 });
 
 export interface ISettings {
   userID: string;
   settings: ICategories;
+  __v?: number;
 }
 
 export interface ICategories {
   appearance: {
     theme: "light" | "dark";
     scale: number;
+  };
+  notifications: {
+    doNotDisturb: boolean;
   };
 }
 

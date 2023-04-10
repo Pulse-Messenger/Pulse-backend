@@ -34,7 +34,10 @@ export class NoteService {
   }
 
   async getUserNotes(userID: string) {
-    const notes = (await Note.find({ creatorID: userID })) ?? [];
+    const notes =
+      (await Note.find({ creatorID: userID }, null, {
+        lean: true,
+      }).select("-__v")) ?? [];
 
     return notes;
   }

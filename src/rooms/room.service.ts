@@ -38,6 +38,9 @@ export class RoomService {
     const user = await User.findById(roomData.creatorID);
     if (!user) throw { code: 404, message: "Room creator not found" };
 
+    if (user.rooms.length >= 100)
+      throw { code: 400, message: "User can be in maximum of 100 rooms" };
+
     user.rooms.push(newRoom.id);
 
     await user.save();
@@ -77,6 +80,30 @@ export class RoomService {
     });
   }
 
+  async updateRoom(userID: string, roomData: { roomID: string; name: string }) {
+    const room = await Room.findById(roomData.roomID);
+    if (!room) throw { code: 404, message: "Room not found" };
+
+    if (room.creatorID.toString() !== userID)
+      throw { code: 403, message: "Only owners can update a room" };
+
+    if (room.friendship) throw { code: 400, message: "Can't edit DMs" };
+
+    room.name = roomData.name;
+
+    const members =
+      room.members.map((mem) => {
+        return mem.toString();
+      }) ?? [];
+
+    await room.save();
+
+    io.to(members).emit("rooms:update", {
+      roomID: room.id,
+      name: room.name,
+    });
+  }
+
   async joinRoom(inviteCode: string, userID: string) {
     const invite = await Invite.findOne({ code: inviteCode });
     if (!invite) throw { code: 404, message: "Invite not found" };
@@ -95,7 +122,7 @@ export class RoomService {
       throw { code: 400, message: "User already member in room" };
 
     const user = await User.findById(userID);
-    if (!user || user.rooms.length > 100)
+    if (!user || user.rooms.length >= 100)
       throw { code: 400, message: "User can be in maximum of 100 rooms" };
 
     user.rooms.push(room.id);
@@ -146,12 +173,14 @@ export class RoomService {
   }
 
   async getUserRooms(userID: string) {
-    const rooms = (await User.findById(userID).select("rooms"))?.rooms ?? [];
+    const rooms =
+      (await User.findById(userID).select("rooms").lean(true))?.rooms ?? [];
     return rooms;
   }
 
   async getUserDMs(userID: string) {
-    const DMs = (await User.findById(userID).select("DMs"))?.DMs ?? [];
+    const DMs =
+      (await User.findById(userID).select("DMs").lean(true))?.DMs ?? [];
     return DMs;
   }
 
@@ -169,7 +198,7 @@ export class RoomService {
     )
       throw { code: 403, message: "Only members can view room info" };
 
-    return room;
+    return room.toObject();
   }
 
   async createDM(userID: string, friendID: string) {

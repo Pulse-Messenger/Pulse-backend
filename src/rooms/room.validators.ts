@@ -4,6 +4,7 @@ export const NewRoomValidator = {
   validator: [
     body("name")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Room name is required")
       .isLength({ min: 5, max: 20 })
@@ -36,8 +37,10 @@ export const RoomInviteValidator = {
 
 export const UpdateRoomValidator = {
   validator: [
+    param("roomID").isMongoId().withMessage("Room ID is required").bail(),
     body("name")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Room name is required")
       .isLength({ min: 5, max: 20 })

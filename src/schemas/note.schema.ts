@@ -11,6 +11,7 @@ export interface INoteSchema {
   creatorID: string;
   userID: string;
   note: string;
+  __v?: number;
 }
 
 export interface INoteDocument extends INoteSchema, Document {}

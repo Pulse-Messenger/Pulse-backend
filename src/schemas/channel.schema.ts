@@ -28,6 +28,7 @@ export interface IChannelSchema {
   category: string;
   description: string;
   room: string | any;
+  __v?: number;
 }
 
 export interface IChannelDocument extends IChannelSchema, Document {}

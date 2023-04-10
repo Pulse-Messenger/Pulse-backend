@@ -15,6 +15,8 @@ export const UpdateNoteValidator = {
       .withMessage("User id is required")
       .bail(),
     body("note")
+      .isString()
+      .trim()
       .isLength({ min: 0, max: 250 })
       .withMessage("Note must be between 0 and 250 characters long")
       .bail(),

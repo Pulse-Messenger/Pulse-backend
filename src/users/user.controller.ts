@@ -6,7 +6,7 @@ import {
   ValidatedApi,
 } from "../utils/controller.decorators";
 import { Request, Response } from "express";
-import { UserService } from "./user.service";
+import { userService } from "./user.service";
 import {
   FriendValidator,
   GetManyValidator,
@@ -14,8 +14,6 @@ import {
   ReorderRoomsValidator,
   UpdateValidator,
 } from "./user.validators";
-
-let userService = new UserService();
 
 @Controller("/users")
 class UserController {
@@ -75,7 +73,6 @@ class UserController {
       profilePic: string;
       displayName: string;
       about: string;
-      email: string;
       password?: string;
     },
     req: Request,

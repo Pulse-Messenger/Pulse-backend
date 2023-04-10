@@ -29,6 +29,9 @@ export class SettingsService {
           scale: 100,
           theme: "dark",
         },
+        notifications: {
+          doNotDisturb: false,
+        },
       },
     });
 

@@ -11,6 +11,7 @@ export interface IFriendshipSchema {
   accepted: boolean;
   creator: string;
   friend: string;
+  __v?: number;
 }
 
 export interface IFriendshipDocument extends IFriendshipSchema, Document {}

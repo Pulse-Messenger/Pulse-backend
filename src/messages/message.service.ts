@@ -1,8 +1,5 @@
 import DOMPurify from "isomorphic-dompurify";
-import mongoose, { mongo } from "mongoose";
-
-import { marked } from "marked";
-import { JSDOM } from "jsdom";
+import mongoose from "mongoose";
 
 import { Channel } from "../schemas/channel.schema";
 import { Room } from "../schemas/room.schema";
@@ -12,7 +9,7 @@ import { Friendship } from "../schemas/friendship.schema";
 
 export class MessageService {
   async getOne(messageID: string, userID: string) {
-    const message = await Message.findById(messageID);
+    const message = await Message.findById(messageID).select("-__v");
 
     if (!message) throw { code: 404, message: "Message does not exist" };
 
@@ -35,7 +32,7 @@ export class MessageService {
         message: "Only room members can view room messages",
       };
 
-    return message;
+    return message.toObject();
   }
 
   async publish(content: string, channelID: string, userID: string) {
@@ -67,7 +64,10 @@ export class MessageService {
 
     if (room?.friendship) {
       const friendship = await Friendship.findOne({
-        $or: [{ creator: userID }, { friend: userID }],
+        $or: [
+          { creator: room.friendship.friendA, friend: room.friendship.friendB },
+          { creator: room.friendship.friendB, friend: room.friendship.friendA },
+        ],
       });
       if (!friendship || !friendship.accepted)
         throw {
@@ -133,7 +133,10 @@ export class MessageService {
 
     await message.remove();
 
-    io.to(members).emit("messages:deleteOne", { messageID: message.id });
+    io.to(members).emit("messages:deleteOne", {
+      messageID: message.id,
+      channelID: message.channel,
+    });
 
     return { messageId: message.id };
   }
@@ -157,7 +160,7 @@ export class MessageService {
     message.content = await this.parseMessage(content.trim());
     await message.save();
 
-    const { _id, ...dt } = message.toObject();
+    const { _id, __v, ...dt } = message.toObject();
 
     io.to(members).emit("messages:update", {
       message: {
@@ -196,7 +199,8 @@ export class MessageService {
         sort: { timestamp: -1 },
         limit,
         skip,
-      })) ?? [];
+        lean: true,
+      }).select("-__v")) ?? [];
 
     return messages;
   }
@@ -230,16 +234,7 @@ export class MessageService {
       output += char;
     }
 
-    const DOM = new JSDOM(await marked(output)).window.document;
-
-    const imgTags = DOM.querySelectorAll("img");
-
-    imgTags.forEach((imgTag) => {
-      imgTag.parentNode?.removeChild(imgTag);
-      DOM.body.insertBefore(imgTag, DOM.body.firstChild);
-    });
-
-    return DOMPurify.sanitize(DOM.documentElement.outerHTML);
+    return DOMPurify.sanitize(output);
   }
 }
 

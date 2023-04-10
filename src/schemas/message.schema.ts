@@ -13,6 +13,7 @@ export interface IMessageSchema {
   sender: string | any;
   channel: string | any;
   timestamp: number;
+  __v?: number;
 }
 
 export interface IMessageDocument extends IMessageSchema, Document {}

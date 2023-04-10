@@ -10,6 +10,16 @@ export const userSchema = new Schema({
   createdAt: Number,
   rooms: [{ type: Schema.Types.ObjectId, ref: "room", index: true }],
   DMs: [{ type: Schema.Types.ObjectId, ref: "room", index: true }],
+  messageNotifications: [
+    {
+      type: {
+        poster: { type: Schema.Types.ObjectId, ref: "user" },
+        room: { type: Schema.Types.ObjectId, ref: "room" },
+        channel: { type: Schema.Types.ObjectId, ref: "channel" },
+        content: { type: String },
+      },
+    },
+  ],
   globalRoles: [{ type: String }],
   passwordHash: String,
   passwordSalt: String,
@@ -31,7 +41,7 @@ userSchema.post("remove", async function (this: IUserDocument) {
 
     const rooms = await model("room").find({ _id: { $in: user.rooms } });
     for (const room of rooms) {
-      if (room.authorID === this.id) {
+      if (room.creatorID.toString() === user.id) {
         await room.remove();
       }
     }
@@ -40,6 +50,12 @@ userSchema.post("remove", async function (this: IUserDocument) {
       { members: user.id },
       { $pull: { members: user.id } }
     );
+
+    const friendships = await model("friendship").find({
+      $or: [{ creator: user.id }, { friend: user.id }],
+    });
+
+    friendships.forEach((fr) => fr.remove());
   } catch (error: any) {
     return;
   }
@@ -63,10 +79,19 @@ export interface IUserSchema {
   rooms: string[] | any[];
   DMs: string[] | any[];
   about: string;
+  messageNotifications: [
+    {
+      poster: string | any;
+      room: string | any;
+      channel: string | any;
+      content: string;
+    }?
+  ];
   globalRoles: string[];
   passwordHash: string;
   passwordSalt: string;
   sessions: IUserSession[];
+  __v?: number;
 }
 
 export interface IUserDocument extends IUserSchema, Document {}

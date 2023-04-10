@@ -10,7 +10,6 @@ import { authenticatedOnly } from "./utils/websockets/websocket.middleware";
 
 config();
 import "./utils/logger";
-import "./utils/marked";
 
 const app = express();
 const port = process.env.APP_PORT || 3000;

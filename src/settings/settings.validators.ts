@@ -16,5 +16,10 @@ export const SettingsValidator = {
       .withMessage("Scale is required")
       .isInt({ min: 50, max: 200 })
       .withMessage("Scale must be between 50 and 200"),
+    body("settings.notifications.doNotDisturb")
+      .notEmpty()
+      .withMessage("Do not disturb is required")
+      .isBoolean()
+      .withMessage("Do not disturb must be a boolean"),
   ],
 };
