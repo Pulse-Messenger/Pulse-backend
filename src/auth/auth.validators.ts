@@ -25,6 +25,8 @@ export const RegisterValidator = {
       .isString()
       .notEmpty()
       .withMessage("Password is required.")
+      .isLength({ min: 6 })
+      .withMessage("Password must be at lest 6 characters long")
       .bail(),
   ],
 };
@@ -73,6 +75,7 @@ export const VerifyEmailValidator = {
     param("emailToken")
       .notEmpty()
       .withMessage("Email token is required.")
+      .isJWT()
       .bail(),
   ],
 };

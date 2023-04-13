@@ -1,4 +1,4 @@
-import { Schema, model, CallbackError } from "mongoose";
+import { Schema, model } from "mongoose";
 
 export const channelSchema = new Schema({
   name: String,
