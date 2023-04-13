@@ -11,6 +11,7 @@ import {
   NewRoomValidator,
   RoomInviteValidator,
   DMValidator,
+  UpdateRoomValidator,
 } from "./room.validators";
 import { roomService } from "./room.service";
 
@@ -42,28 +43,20 @@ class RoomController {
     }
   }
 
-  @ValidatedApi("post", "/update", NewRoomValidator)
+  @ValidatedApi("post", "/updateOne/:roomID", UpdateRoomValidator)
   @Middleware(authenticatedOnly())
   async update(
     data: {
+      roomID: string;
       name: string;
-      profilePic: string;
     },
     req: Request,
     res: Response
   ) {
     try {
-      const uid = getUserId(req);
+      await roomService.updateRoom(getUserId(req), data);
 
-      const roomData = {
-        ...data,
-        creatorID: uid,
-        profilePic: "",
-      };
-
-      const r = await roomService.addRoom(roomData);
-
-      res.status(201).send({ roomID: r.roomID });
+      res.sendStatus(200);
     } catch (err: any) {
       res.status(err.code).send({ errors: [err.message] });
     }

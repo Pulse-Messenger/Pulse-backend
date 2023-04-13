@@ -41,7 +41,7 @@ export class ChannelService {
     await channel.save();
     await room.save();
 
-    const { _id, ...dt } = channel.toObject();
+    const { _id, __v, ...dt } = channel.toObject();
 
     const members =
       room.members.map((mem) => {
@@ -52,7 +52,6 @@ export class ChannelService {
       channel: {
         id: _id,
         ...dt,
-        messages: {},
       },
     });
 
@@ -85,7 +84,7 @@ export class ChannelService {
   }
 
   async getOne(channelID: string, userID: string) {
-    const channel = await Channel.findById(channelID).select("-messages");
+    const channel = await Channel.findById(channelID).select(" -__v");
 
     if (!channel) throw { code: 404, message: "Channel not found" };
 
@@ -102,7 +101,7 @@ export class ChannelService {
     )
       throw { code: 403, message: "Only room member can fetch channels" };
 
-    return channel;
+    return channel.toObject();
   }
 
   async getRoomChannels(roomID: string, userID: string) {
@@ -151,13 +150,12 @@ export class ChannelService {
         return mem.toString();
       }) ?? [];
 
-    const { _id, ...dt } = channel.toObject();
+    const { _id, __v, ...dt } = channel.toObject();
 
     io.to(members).emit("channels:update", {
       channel: {
         id: _id,
         ...dt,
-        messages: {},
       },
     });
   }

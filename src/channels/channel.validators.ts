@@ -4,6 +4,7 @@ export const NewChannelValidator = {
   validator: [
     body("name")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Name is required.")
       .bail()
@@ -12,6 +13,7 @@ export const NewChannelValidator = {
       .bail(),
     body("category")
       .isString()
+      .trim()
       .withMessage("Category is required.")
       .bail()
       .isLength({ min: 0, max: 20 })
@@ -20,6 +22,7 @@ export const NewChannelValidator = {
     body("description")
       .isString()
       .notEmpty()
+      .trim()
       .withMessage("Description is required.")
       .bail()
       .isLength({ min: 1, max: 50 })
@@ -59,6 +62,7 @@ export const UpdateChannelValidator = {
     body("name")
       .isString()
       .notEmpty()
+      .trim()
       .withMessage("Name is required.")
       .bail()
       .isLength({ min: 1, max: 32 })
@@ -67,6 +71,7 @@ export const UpdateChannelValidator = {
     body("description")
       .isString()
       .notEmpty()
+      .trim()
       .withMessage("Description is required.")
       .bail()
       .isLength({ min: 1, max: 50 })
@@ -74,6 +79,7 @@ export const UpdateChannelValidator = {
       .bail(),
     body("category")
       .isString()
+      .trim()
       .withMessage("Category is required.")
       .bail()
       .isLength({ min: 0, max: 20 })

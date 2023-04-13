@@ -69,7 +69,7 @@ export class AuthService {
     try {
       const user = await User.findOne({
         "sessions.token": token,
-      });
+      }).select("sessions");
       if (!user) throw "Err";
 
       const res = jwt.verify(token, process.env.JWT_SECRET as string);
@@ -90,7 +90,7 @@ export class AuthService {
   async deleteCurrentSession(token: string) {
     const user = await User.findOne({
       "sessions.token": token,
-    });
+    }).select("sessions");
 
     if (!user) {
       throw { code: 404, message: "Session not found" };
@@ -107,7 +107,7 @@ export class AuthService {
   async deleteSession(userID: string, sessionID: string) {
     const user = await User.findOne({
       "sessions._id": sessionID,
-    });
+    }).select("sessions");
 
     if (!user) {
       throw { code: 404, message: "Session not found" };
@@ -129,7 +129,7 @@ export class AuthService {
   }
 
   async deleteAllSessions(uid: string) {
-    const user = await User.findById(uid);
+    const user = await User.findById(uid).select("sessions");
 
     if (!user) {
       throw { code: 404, message: "User not found" };
@@ -155,7 +155,7 @@ export class AuthService {
   }
 
   async getSession(uid: string) {
-    const user = await User.findOne({ id: uid });
+    const user = await User.findOne({ id: uid }).select("sessions");
 
     if (!user) {
       throw { code: 404, message: "User not found" };
@@ -168,7 +168,7 @@ export class AuthService {
   }
 
   async verifyEmail(userID: string) {
-    const user = await User.findById(userID);
+    const user = await User.findById(userID).select("verified");
     if (!user) throw { code: 404, message: "User does not exist" };
 
     if (!user.verified) {
@@ -179,12 +179,12 @@ export class AuthService {
   }
 }
 
-// everyday at noon
-const emailJob = new CronJob("0 */6 * * *	", async () => {
+// every 6th hour
+const emailJob = new CronJob("0 */6 * * *", async () => {
   const unverifiedUsers = await User.find({ verified: false });
   unverifiedUsers.forEach(async (usr) => {
     const now = Date.now();
-    if (now - usr.createdAt >= 86400000) await usr.remove();
+    if (now - usr.createdAt >= 8.64e7) await usr.remove(); // 24h
   });
 });
 emailJob.start();

@@ -6,15 +6,20 @@ import { ascrypt } from "../utils/crypto";
 import { Room } from "../schemas/room.schema";
 import { io } from "../utils/websocket.server";
 import { settignsService } from "../settings/settings.service";
+import { Friendship } from "../schemas/friendship.schema";
 
 export class UserService {
   async UserExists(username: string, email: string) {
-    const user = await User.findOne({ $or: [{ username }, { email }] });
+    const user = await User.findOne({ $or: [{ username }, { email }] }, null, {
+      lean: true,
+    }).select("_id");
     return !!user;
   }
 
   async UserVerified(username: string, email: string) {
-    const user = await User.findOne({ $or: [{ username }, { email }] });
+    const user = await User.findOne({ $or: [{ username }, { email }] }).select(
+      "verified"
+    );
     return user?.verified;
   }
 
@@ -36,6 +41,7 @@ export class UserService {
       verified: false,
       createdAt: Date.now(),
       about: "",
+      messageNotifications: [],
       globalRoles: [],
       passwordHash: hash,
       passwordSalt: salt,
@@ -47,21 +53,25 @@ export class UserService {
 
     await settignsService.create(user.id);
 
-    return user;
+    return user.toObject();
   }
 
   async getSelf(userID: string) {
-    const user = await User.findById(userID).select(
-      "-passwordHash -passwordSalt -sessions.token"
-    );
+    const user = await User.findById(userID)
+      .select(
+        "-passwordHash -passwordSalt -sessions.token -messageNotifications -__v"
+      )
+      .lean(true);
 
     return user;
   }
 
   async getOne(userID: string) {
-    const user = await User.findById(userID).select(
-      "-email -passwordHash -passwordSalt -sessions -rooms"
-    );
+    const user = await User.findById(userID)
+      .select(
+        "-email -passwordHash -passwordSalt -sessions -rooms -messageNotifications -__v"
+      )
+      .lean(true);
 
     return user;
   }
@@ -83,7 +93,8 @@ export class UserService {
     return (
       await room.populate({
         path: "members",
-        select: "-email -passwordHash -passwordSalt -sessions -rooms",
+        select:
+          "-email -passwordHash -passwordSalt -sessions -rooms -messageNotifications -__v",
       })
     ).members;
   }
@@ -93,7 +104,6 @@ export class UserService {
     data: {
       displayName: string;
       about: string;
-      email: string;
       password?: string;
     }
   ) {
@@ -110,7 +120,6 @@ export class UserService {
 
     user.displayName = data.displayName;
     user.about = data.about;
-    user.email = data.email;
 
     await user.save();
 
@@ -126,10 +135,22 @@ export class UserService {
     const rooms = user.rooms;
     rooms.forEach(async (el: Schema.Types.ObjectId) => {
       const room = await Room.findById(el.toString());
-      if (room) members = members.concat(room.members);
+      if (room) members = members.concat(room.members.map((m) => m.toString()));
     });
+    const friends = await Friendship.find({
+      $or: [{ creator: userID }, { friend: userID }],
+    });
+    members = members.concat(
+      friends.map((fr) => {
+        const friend =
+          fr.creator.toString() === userID
+            ? fr.friend.toString()
+            : fr.creator.toString();
+        return friend;
+      })
+    );
 
-    io.to(members).emit("users:update", {
+    io.to([...new Set(members)]).emit("users:update", {
       user: {
         userID,
         displayName: user.displayName,

@@ -10,7 +10,6 @@ import { authenticatedOnly } from "./utils/websockets/websocket.middleware";
 
 config();
 import "./utils/logger";
-import "./utils/marked";
 
 const app = express();
 const port = process.env.APP_PORT || 3000;
@@ -32,6 +31,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     next();
   }
 });
+
+app.set("trust proxy", "loopback");
 
 import "./auth/auth.controller";
 import "./users/user.controller";

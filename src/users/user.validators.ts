@@ -4,6 +4,7 @@ export const UpdateValidator = {
   validator: [
     body("displayName")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Display name is required.")
       .bail()
@@ -11,10 +12,11 @@ export const UpdateValidator = {
       .withMessage("Display name must be between 5 and 20 characters.")
       .bail(),
     body("about")
+      .isString()
+      .trim()
       .isLength({ min: 0, max: 200 })
       .withMessage("About name must be between 0 and 200 characters.")
       .bail(),
-    body("email").isEmail().withMessage("Email is required.").bail(),
     body("password"),
   ],
 };

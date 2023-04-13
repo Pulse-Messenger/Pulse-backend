@@ -22,7 +22,7 @@ const messageLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
-@Controller("/messages", messageLimiter)
+@Controller("/messages")
 export class MessageController {
   @ValidatedApi("get", "/getOne/:messageID", GetMessageValidator)
   @Middleware(authenticatedOnly())

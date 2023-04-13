@@ -30,7 +30,14 @@ export class InviteService {
 
     await invite.save();
 
-    return { invite };
+    return {
+      invite: {
+        _id: invite.id,
+        code: invite.code,
+        timeCreated: invite.timeCreated,
+        roomID: invite.roomID,
+      },
+    };
   }
 
   async removeInvite(inviteID: string, userID: string) {

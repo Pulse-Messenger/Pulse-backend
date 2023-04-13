@@ -22,9 +22,8 @@ import {
   notAuthenticatedOnly,
   getToken,
 } from "./auth.middleware";
-import { email } from "../utils/email";
+import { verificationEmail, email } from "../utils/email";
 import * as jwt from "jsonwebtoken";
-import { JWT } from "google-auth-library";
 
 @Controller("/auth")
 class AuthController {
@@ -51,7 +50,7 @@ class AuthController {
     const user = await userService.CreateUser(data);
 
     const emailToken = jwt.sign(
-      { userID: user.id },
+      { userID: user._id },
       process.env.JWT_SECRET as string,
       {
         issuer: "Pulse",
@@ -66,14 +65,7 @@ class AuthController {
     email.sendEmail({
       to: data.email,
       subject: "Click to verify email",
-      html: `
-      <h3>Welcome To Pulse Messenger</h3>
-      <a href="${tokenURL}">Click here to verify email</a>
-      <p>Link doesn't work?</p>
-      ${tokenURL}
-
-      <p>Account will be automatically deleted after 1 day if you dont verify your email</p>
-      `,
+      html: verificationEmail(tokenURL),
     });
 
     res.sendStatus(201);
@@ -99,7 +91,9 @@ class AuthController {
 
       const tokens = await authService.createSession(
         data.username,
-        req.socket.remoteAddress ?? "???",
+        req.headers["x-forwarded-for"]?.toString() ??
+          req.socket.remoteAddress ??
+          "???",
         req.headers["user-agent"] ?? "???"
       );
 

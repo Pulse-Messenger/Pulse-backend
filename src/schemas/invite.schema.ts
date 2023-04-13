@@ -11,6 +11,7 @@ export interface IInviteSchema {
   code: string;
   timeCreated: number;
   roomID: string | any;
+  __v?: number;
 }
 
 export interface IInviteDocument extends IInviteSchema, Document {}

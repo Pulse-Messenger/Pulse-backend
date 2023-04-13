@@ -67,6 +67,7 @@ export interface IRoomSchema {
     friendA: string;
     friendB: string;
   };
+  __v?: number;
 }
 
 export interface IRoomDocument extends IRoomSchema, Document {}

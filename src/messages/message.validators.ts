@@ -21,6 +21,7 @@ export const EditMessageValidator = {
     param("messageID").isMongoId().withMessage("Not a valid message ID").bail(),
     body("content")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Message content is required")
       .bail()
@@ -34,6 +35,7 @@ export const PublishMessageValidator = {
   validator: [
     body("content")
       .isString()
+      .trim()
       .notEmpty()
       .withMessage("Message content is required")
       .bail()
