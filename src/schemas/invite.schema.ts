@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 
 export const inviteSchema = new Schema({
   code: { type: String, index: true },
-  timeCreated: { type: Number, expires: "24h", default: Date.now() },
+  timeCreated: { type: Number, expires: 60*60*24, default: Date.now() },
   roomID: { type: Schema.Types.ObjectId, ref: "room", index: true },
 });
 

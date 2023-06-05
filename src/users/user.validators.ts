@@ -17,7 +17,10 @@ export const UpdateValidator = {
       .isLength({ min: 0, max: 200 })
       .withMessage("About name must be between 0 and 200 characters.")
       .bail(),
-    body("password"),
+    body("password").custom((pwd) => {
+      if (!pwd) return true;
+      return pwd.length >= 6;
+    }),
   ],
 };
 
