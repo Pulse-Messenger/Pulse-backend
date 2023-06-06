@@ -4,7 +4,7 @@ API for Pulse Messenger
 
 ## How to run
 
-- install the dependencies with
+- install the dependencies with node lts/hydrogen
 
 ```bash
 npm i

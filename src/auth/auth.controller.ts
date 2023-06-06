@@ -22,7 +22,12 @@ import {
   notAuthenticatedOnly,
   getToken,
 } from "./auth.middleware";
-import { verificationEmail, email } from "../utils/email";
+import {
+  verificationEmail,
+  email,
+  emailVerified,
+  emailFailed,
+} from "../utils/email";
 import * as jwt from "jsonwebtoken";
 
 @Controller("/auth")
@@ -55,6 +60,7 @@ class AuthController {
       {
         issuer: "Pulse",
         subject: "Email",
+        expiresIn: "1d",
       }
     );
 
@@ -211,12 +217,11 @@ class AuthController {
       if (!dt) throw { code: 401, message: "Invalid email token" };
 
       //@ts-ignore
-      await authService.verifyEmail(dt.userID);
+      const exp = await authService.verifyEmail(dt.userID);
 
-      res.send("User is now verified");
+      res.send(emailVerified);
     } catch (err: any) {
-      console.error(err);
-      res.status(err.code).send({ errors: [err.message] });
+      res.status(err.code).send(emailFailed);
     }
   }
 }

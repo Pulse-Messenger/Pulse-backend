@@ -131,3 +131,155 @@ export const verificationEmail = (confirmEndpoint: string) => {
     </html>
   `;
 };
+
+export const emailVerified = `
+      <html>
+        <head>
+          <meta http-equiv="Refresh" content="5; URL=${process.env.CLIENT_PATH}" />
+        <title>Pulse Messenger Mail Confirmation</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * {
+            padding: 0;
+            margin: 0;
+          }
+          :root {
+            font-size: 25px;
+          }
+          @media screen and (max-width: 600px) {
+            :root {
+              font-size: 18px;
+            }
+          }
+          body {
+            padding: 2rem;
+            text-align: center;
+          }
+          table {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          td {
+            text-align: center;
+          }
+          h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #42404d;
+          }
+          img {
+            width: 5.5rem;
+            padding: 0.5rem;
+          }
+          .content {
+            font-size: 0.9rem;
+            padding: 1rem 0;
+            text-align: center;
+          }
+          a {
+            text-decoration: none;
+            padding: 0.3rem 0.5rem;
+            background: #1d1c20;
+            border: 2px solid #f84e6a;
+            border-radius: 5px;
+            color: #ffffff !important;
+          }
+        </style>
+      </head>
+      <body>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td>
+              <img
+                src="https://s3.eu-central-2.wasabisys.com/cdn.pulse-messenger.com/misc/Logo.png"
+                alt="logo"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h1>Welcome to<br />Pulse Messenger</h1>
+              <p>redirecting...</p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+      `;
+
+export const emailFailed = `
+      <html>
+        <head>
+          <meta http-equiv="Refresh" content="5; URL=${process.env.CLIENT_PATH}" />
+        <title>Pulse Messenger Mail Confirmation</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          * {
+            padding: 0;
+            margin: 0;
+          }
+          :root {
+            font-size: 25px;
+          }
+          @media screen and (max-width: 600px) {
+            :root {
+              font-size: 18px;
+            }
+          }
+          body {
+            padding: 2rem;
+            text-align: center;
+          }
+          table {
+            margin-left: auto;
+            margin-right: auto;
+          }
+          td {
+            text-align: center;
+          }
+          h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: #42404d;
+          }
+          img {
+            width: 5.5rem;
+            padding: 0.5rem;
+          }
+          .content {
+            font-size: 0.9rem;
+            padding: 1rem 0;
+            text-align: center;
+          }
+          a {
+            text-decoration: none;
+            padding: 0.3rem 0.5rem;
+            background: #1d1c20;
+            border: 2px solid #f84e6a;
+            border-radius: 5px;
+            color: #ffffff !important;
+          }
+        </style>
+      </head>
+      <body>
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+            <td>
+              <img
+                src="https://s3.eu-central-2.wasabisys.com/cdn.pulse-messenger.com/misc/Logo.png"
+                alt="logo"
+              />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <h1>This token has expired!</h1>
+              <p>redirecting...</p>
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+      `;
