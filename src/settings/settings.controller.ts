@@ -9,8 +9,16 @@ import { authenticatedOnly, getUserId } from "../auth/auth.middleware";
 import { ICategories } from "../schemas/settings.schema.ts";
 import { settignsService } from "./settings.service";
 import { Request, Response } from "express";
+import { rateLimit } from "express-rate-limit";
 
-@Controller("/settings")
+const settingsLimiter = rateLimit({
+  windowMs: 10000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/settings", settingsLimiter)
 class UserController {
   @Api("get", "/get")
   @Middleware(authenticatedOnly())

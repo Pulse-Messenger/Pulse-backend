@@ -8,8 +8,16 @@ import {
 import { Request, Response } from "express";
 import { UpdateNoteValidator } from "./note.validators";
 import { noteService } from "./note.service";
+import { rateLimit } from "express-rate-limit";
 
-@Controller("/notes")
+const noteLimiter = rateLimit({
+  windowMs: 10000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/notes", noteLimiter)
 class InviteController {
   @ValidatedApi("post", "/update/", UpdateNoteValidator)
   @Middleware(authenticatedOnly())

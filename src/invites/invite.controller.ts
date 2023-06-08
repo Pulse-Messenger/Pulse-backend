@@ -1,3 +1,4 @@
+import { rateLimit } from "express-rate-limit";
 import { authenticatedOnly, getUserId } from "../auth/auth.middleware";
 import {
   Controller,
@@ -8,7 +9,14 @@ import { inviteService } from "./invite.service";
 import { NewInviteValidator, RemoveInviteValidator } from "./invite.validators";
 import { Request, Response } from "express";
 
-@Controller("/invites")
+const inviteLimiter = rateLimit({
+  windowMs: 5000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/invites", inviteLimiter)
 class InviteController {
   @ValidatedApi("post", "/create/:roomID", NewInviteValidator)
   @Middleware(authenticatedOnly())

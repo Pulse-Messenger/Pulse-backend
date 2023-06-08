@@ -16,13 +16,13 @@ import {
 } from "./message.validators";
 
 const messageLimiter = rateLimit({
-  windowMs: 10000, // 10 seconds
-  max: 50, // Limit each IP to 50 requests per `window`
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  windowMs: 10000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-@Controller("/messages")
+@Controller("/messages", messageLimiter)
 export class MessageController {
   @ValidatedApi("get", "/getOne/:messageID", GetMessageValidator)
   @Middleware(authenticatedOnly())
