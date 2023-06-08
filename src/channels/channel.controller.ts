@@ -12,8 +12,16 @@ import {
   RemoveChannelValidator,
   UpdateChannelValidator,
 } from "./channel.validators";
+import { rateLimit } from "express-rate-limit";
 
-@Controller("/channels")
+const channelLimiter = rateLimit({
+  windowMs: 5000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/channels", channelLimiter)
 class ChannelController {
   @ValidatedApi("post", "/create", NewChannelValidator)
   @Middleware(authenticatedOnly())

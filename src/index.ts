@@ -17,8 +17,7 @@ const port = process.env.APP_PORT || 3000;
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
-    methods: "*",
+    origin: process.env.CLIENT_PATH!,
   })
 );
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

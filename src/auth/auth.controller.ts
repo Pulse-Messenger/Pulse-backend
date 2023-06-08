@@ -29,8 +29,16 @@ import {
   emailFailed,
 } from "../utils/email";
 import * as jwt from "jsonwebtoken";
+import { rateLimit } from "express-rate-limit";
 
-@Controller("/auth")
+const authLimiter = rateLimit({
+  windowMs: 10000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/auth", authLimiter)
 class AuthController {
   @Api()
   @Middleware(authenticatedOnly())
@@ -97,7 +105,7 @@ class AuthController {
 
       const tokens = await authService.createSession(
         data.username,
-        req.headers["x-forwarded-for"]?.toString() ??
+        req.socket.remoteAddress?.split(",")[0] ??
           req.socket.remoteAddress ??
           "???",
         req.headers["user-agent"] ?? "???"

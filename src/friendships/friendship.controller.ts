@@ -11,8 +11,16 @@ import {
   FriendshipValidator,
   NewFriendValidator,
 } from "./friendship.validators";
+import { rateLimit } from "express-rate-limit";
 
-@Controller("/friendships")
+const friendshipLimiter = rateLimit({
+  windowMs: 10000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+@Controller("/friendships", friendshipLimiter)
 class FriendshipController {
   @Api("get", "/get")
   @Middleware(authenticatedOnly())
