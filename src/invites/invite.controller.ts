@@ -11,7 +11,7 @@ import { Request, Response } from "express";
 
 const inviteLimiter = rateLimit({
   windowMs: 5000,
-  max: 5,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
 });

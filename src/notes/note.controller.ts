@@ -12,7 +12,7 @@ import { rateLimit } from "express-rate-limit";
 
 const noteLimiter = rateLimit({
   windowMs: 10000,
-  max: 10,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
 });

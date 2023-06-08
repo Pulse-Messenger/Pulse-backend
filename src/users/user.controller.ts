@@ -14,16 +14,8 @@ import {
   ReorderRoomsValidator,
   UpdateValidator,
 } from "./user.validators";
-import { rateLimit } from "express-rate-limit";
 
-const userLimiter = rateLimit({
-  windowMs: 10000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-@Controller("/users", userLimiter)
+@Controller("/users")
 class UserController {
   @Api("get", "/get")
   @Middleware(authenticatedOnly())

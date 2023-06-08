@@ -14,16 +14,8 @@ import {
   UpdateRoomValidator,
 } from "./room.validators";
 import { roomService } from "./room.service";
-import { rateLimit } from "express-rate-limit";
 
-const roomsLimiter = rateLimit({
-  windowMs: 5000,
-  max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-@Controller("/rooms", roomsLimiter)
+@Controller("/rooms")
 class RoomController {
   @ValidatedApi("post", "/create", NewRoomValidator)
   @Middleware(authenticatedOnly())
