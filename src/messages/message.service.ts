@@ -43,6 +43,12 @@ export class MessageService {
       timestamp: Date.now(),
     };
 
+    if (!data.content || data.content.length === 0)
+      throw {
+        code: 400,
+        message: "Message cannot be empty",
+      };
+
     const channel = await Channel.findById(channelID);
     if (!channel)
       throw {
@@ -158,6 +164,13 @@ export class MessageService {
       }) ?? [];
 
     message.content = await this.parseMessage(content.trim());
+
+    if (!message.content || message.content.length === 0)
+      throw {
+        code: 400,
+        message: "Message cannot be empty",
+      };
+
     await message.save();
 
     const { _id, __v, ...dt } = message.toObject();
@@ -205,36 +218,9 @@ export class MessageService {
     return messages;
   }
 
-  // scuffed
   async parseMessage(msg: string) {
-    let output = "";
-    let inCodeBlock = false;
-
-    for (let i = 0; i < msg.length; i++) {
-      let char = msg[i];
-
-      if (char === "`" && (i === 0 || msg[i - 1] !== "\\")) {
-        inCodeBlock = !inCodeBlock;
-      }
-
-      if (!inCodeBlock) {
-        char = char.replace(/[&<>"']/g, (tag) => {
-          return (
-            {
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              "'": "&apos;",
-              '"': "&quot;",
-            }[tag] || tag
-          );
-        });
-      }
-
-      output += char;
-    }
-
-    return DOMPurify.sanitize(output);
+    // return DOMPurify.sanitize(msg);
+    return msg;
   }
 }
 

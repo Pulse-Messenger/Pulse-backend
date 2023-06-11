@@ -17,7 +17,7 @@ import {
 
 const messageLimiter = rateLimit({
   windowMs: 10000,
-  max: 20,
+  max: 50,
   standardHeaders: true,
   legacyHeaders: false,
 });
