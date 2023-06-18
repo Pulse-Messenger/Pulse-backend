@@ -116,21 +116,15 @@ export class MessageService {
         return member.toString();
       }) ?? [];
 
-    if (
-      message.sender.toString() !==
-        new mongoose.Types.ObjectId(userID).toString() &&
-      !room?.friendship
-    )
+    if (message.sender.toString() !== userID && room?.friendship)
       throw {
         code: 403,
         message: "Only mesage creators can remove messages in a DM",
       };
 
     if (
-      message.sender.toString() !==
-        new mongoose.Types.ObjectId(userID).toString() &&
-      room?.creatorID.toString() !==
-        new mongoose.Types.ObjectId(userID).toString()
+      message.sender.toString() !== userID &&
+      room?.creatorID.toString() !== userID
     )
       throw {
         code: 403,
