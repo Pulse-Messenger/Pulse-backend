@@ -105,9 +105,8 @@ class AuthController {
 
       const tokens = await authService.createSession(
         data.username,
-        req.socket.remoteAddress?.split(",")[0] ??
-          req.socket.remoteAddress ??
-          "???",
+        // cloudflare
+        req.headers["cf-connecting-ip"]?.toString() ?? req.ip ?? "???",
         req.headers["user-agent"] ?? "???"
       );
 
